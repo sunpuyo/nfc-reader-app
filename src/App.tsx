@@ -1,5 +1,6 @@
 import { NFCReader } from './components/NFCReader/NFCReader'
 import { DataDisplay } from './components/DataDisplay/DataDisplay'
+import { LogViewer } from './components/LogViewer/LogViewer'
 import { useNFC } from './hooks/useNFC'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <p className="mt-1">HTTPS 연결에서만 작동합니다</p>
         </footer>
       </div>
+      <LogViewer />
     </div>
   )
 }
