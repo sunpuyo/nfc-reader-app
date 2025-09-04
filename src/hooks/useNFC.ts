@@ -47,6 +47,24 @@ export function useNFC() {
       ndef.addEventListener('reading', ({ message, serialNumber }: any) => {
         console.log('NFC Tag detected:', serialNumber)
         console.log('NDEF Message:', message)
+        
+        // Log raw message structure for debugging
+        if (message) {
+          console.log('Message structure:', {
+            hasRecords: !!message.records,
+            recordCount: message.records?.length,
+            records: message.records?.map((r: any, i: number) => ({
+              index: i,
+              recordType: r.recordType,
+              mediaType: r.mediaType,
+              hasData: !!r.data,
+              dataSize: r.data?.byteLength,
+              id: r.id,
+              encoding: r.encoding,
+              lang: r.lang
+            }))
+          })
+        }
 
         const tagData: NFCTagData = {
           serialNumber: serialNumber || 'Unknown',
@@ -56,22 +74,40 @@ export function useNFC() {
 
         if (message && message.records) {
           tagData.message = {
-            records: message.records.map((record: any) => ({
-              recordType: record.recordType,
-              mediaType: record.mediaType,
-              id: record.id,
-              data: record.data,
-              encoding: record.encoding,
-              lang: record.lang
-            }))
+            records: message.records.map((record: any) => {
+              // Log each record in detail
+              console.log('Processing record:', {
+                type: record.recordType,
+                mediaType: record.mediaType,
+                dataBytes: record.data ? Array.from(new Uint8Array(record.data.buffer, record.data.byteOffset, Math.min(20, record.data.byteLength))) : null
+              })
+              
+              return {
+                recordType: record.recordType || 'unknown',
+                mediaType: record.mediaType,
+                id: record.id,
+                data: record.data,
+                encoding: record.encoding,
+                lang: record.lang
+              }
+            })
           }
 
-          tagData.recordTypes = message.records.map((r: any) => r.recordType)
+          tagData.recordTypes = message.records.map((r: any) => r.recordType || 'unknown')
           
-          // Convert first record to hex for raw data display
-          if (message.records.length > 0 && message.records[0].data) {
-            tagData.rawData = dataViewToHex(message.records[0].data)
+          // Convert all records to hex for debugging
+          const hexData: string[] = []
+          message.records.forEach((record: any, index: number) => {
+            if (record.data) {
+              hexData.push(`Record ${index}: ${dataViewToHex(record.data)}`)
+            }
+          })
+          if (hexData.length > 0) {
+            tagData.rawData = hexData.join('\n')
           }
+        } else {
+          console.warn('No NDEF message or records found in tag')
+          tagData.rawData = 'No NDEF data found'
         }
 
         setState(prev => ({
