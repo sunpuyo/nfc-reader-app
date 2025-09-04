@@ -64,10 +64,10 @@ export const DataDisplay: React.FC<DataDisplayProps> = ({ data, history, onClear
                           {type}
                         </span>
                       </div>
-                      {content && (
+                      {(content || record.recordType === 'empty') && (
                         <div className="mt-2">
                           <pre className="text-sm text-gray-700 whitespace-pre-wrap break-all font-mono">
-                            {content}
+                            {content || '(빈 NFC 태그)'}
                           </pre>
                         </div>
                       )}

@@ -111,12 +111,16 @@ export function parseNDEFRecord(record: NDEFRecord): {
     case 'empty':
     case 'unknown':
       type = record.recordType.charAt(0).toUpperCase() + record.recordType.slice(1)
-      if (record.data) {
+      if (record.data && record.data.byteLength > 0) {
         try {
           content = decoder.decode(record.data)
         } catch (e) {
           content = dataViewToHex(record.data)
         }
+      } else if (record.recordType === 'empty') {
+        content = '(빈 레코드)'
+      } else {
+        content = '(데이터 없음)'
       }
       break
       
